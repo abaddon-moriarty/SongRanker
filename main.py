@@ -21,7 +21,7 @@ def button_func(songList, i, j, ratingMatrix, choice):
     # print("A button was pressed")
     if choice == 1:
         ratingMatrix[i][j] = 1.0
-    if choice == 2:
+    elif choice == 2:
         ratingMatrix[i][j] = 2.0
     else:
         ratingMatrix[i][j] = 0.5
