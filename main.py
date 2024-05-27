@@ -25,15 +25,17 @@ def button_func(songList, i, j, ratingMatrix, choice):
     else:
         ratingMatrix[i][j] = 0.5
     #update the button with next pair of songs
+
+    if check_var.get() == True: # This will only update the ranking if the correct option is selected
+        calculate_ranking()
+        update_size()
+    else:
+        output_label['text'] = "" # This removes the ranking if the option is selected in the middle of the selections otherwise latest print remained on screen.
+        update_size()
     next_pair()
     
 def next_pair():
     global current_pair, check_var
-
-    if check_var.get() == True: # This will only update the ranking if the correct option is selected
-        calculate_ranking()
-    else:
-        output_label['text'] = "" # This removes the ranking if the option is selected in the middle of the selections otherwise latest print remained on screen.
 
     if current_pair < len(order):
         i, j = order[current_pair]
@@ -66,18 +68,25 @@ def calculate_ranking():
     output_label['text'] = "\n".join([f"{i+1}. {song}: {score} points" for i, (song, score) in enumerate(ranking)])
     output_label.pack(pady=10)
 
+def update_size():
+    root.update_idletasks()
+    root.geometry(f"{root.winfo_reqwidth()}x{root.winfo_reqheight()}")
+    
 def start():
     start_button.pack_forget()
+
     button1.pack(padx=5, side='left')
     button2.pack(padx=5, side='left')
     button3.pack(pady=5)
     battle_frame.pack()
     input_frame.pack()
+    output_label.pack()
     pg_frame.pack()
-    progress_bar.pack(padx=5)
-    pg_title.pack()
+    progress_bar.pack(pady=5)
+    pg_title.pack(pady=5)
     result_frame.pack()
-
+    update_size()
+    
     # Pairwise Comparison: Implement a pairwise comparison mechanism where the user is presented with pairs of songs and asked to choose their preferred song from each pair. This process continues until all pairs have been compared.
     # To ensure that each song is compared with every other song exactly once, you can use a round-robin tournament-style approach.
     # Start by randomly selecting a song to be compared against every other song in the list.
@@ -104,7 +113,7 @@ def start():
 # GUI window
 root = tk.Tk()
 root.title("the TTDP sorting hat")
-root.geometry("500x250") # sets size of the window
+root.geometry("500x150") # sets size of the window
 
 global check_var
 
@@ -116,15 +125,18 @@ file_menu = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
 file_menu.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var)
-file_menu.add_radiobutton(label="Leave Ranking as Surprise", variable = check_var)
+file_menu.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var)
 menu.add_cascade(label="Ranking", menu=file_menu)  
 
 root.configure(menu=menu)
 
- 
 # title
 label = tk.Label(root, text="Come and sort your favourite TTDP songs!", font=("Georgia", 12, "bold"))
-label.pack(padx=20, pady=20)
+label.pack(padx=75, pady=20)
+
+# Configure style of buttons
+style = ttk.Style()
+style.configure("elder.TButton", font=('Georgia', 10))
 
 
 # Input List of Songs: Start by obtaining a list of songs from the user or from a file.
@@ -137,17 +149,19 @@ pg_frame = ttk.Frame(root)
 result_frame = ttk.Frame(root)
 
 
-start_button = ttk.Button(root, text="Start Here", command=start)
+start_button = ttk.Button(root, text="Start Here", command=start, style="elder.TButton")
 start_button.pack()
 
-button1 = ttk.Button(battle_frame)
-button2 = ttk.Button(battle_frame)
-button3 = ttk.Button(input_frame, text="I can't choose")
+button1 = ttk.Button(battle_frame, style="elder.TButton")
+button2 = ttk.Button(battle_frame, style="elder.TButton")
+button3 = ttk.Button(input_frame, text="I can't choose", style="elder.TButton")
 
 progress_bar = ttk.Progressbar(pg_frame, orient="horizontal", length = 300, mode='determinate')
 pg_title = ttk.Label(pg_frame)
 
-output_label = ttk.Label(result_frame, font=("Georgia", 12))
+output_label = ttk.Label(result_frame, font=("Georgia", 11))
+
+
 
 
 
