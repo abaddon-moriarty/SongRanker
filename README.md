@@ -11,7 +11,7 @@ You can choose wether you want to see the list of songs as you rank them or if y
 Once you have finished, you can choose to export your ranking in a text file.
 
 
-# Improuvements
+## Improuvements
 - Option to import a new list of songs and rank those.
 - Adding little icons in the ranking (if you choose to display it) to see which song won or lost a place.
 - the best thing would be to have a music snippet for each song, to be able to hear it before choosing, but that seems hard to do. I don't really know how to integrate spotify or equivalent.
