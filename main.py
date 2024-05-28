@@ -1,6 +1,8 @@
 import random
 import tkinter as tk
+
 from tkinter import ttk
+from tkinter.filedialog import asksaveasfile
 
 ### TO DO: * right now the window size gets re-calculated at each choice, there must be a better way: calculating only when display option is changed and on start. check "update_size()"
 
@@ -83,8 +85,7 @@ def update_size():
     else:
         root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight())}")
     remove_height = 0
-
-    
+ 
 def start():
     global current_pair, order, ratingMatrix, songList, remove_height
 
@@ -119,8 +120,26 @@ def start():
         next_pair()
 
 def export():
-    with open("result.txt", mode="w", encoding="utf-8") as f:
-        f.write(output_label['text'])
+    files = [('Text Document', '*.txt'),
+             ('All Files', '*.*'),  
+             ('Python Files', '*.py'), ] 
+
+    file = asksaveasfile(filetypes = files, 
+                         defaultextension = files[0],
+                         title="Save File",
+                         mode="w") 
+    if file is None: # asksaveasfile return `None` if dialog closed with "cancel".
+        return
+    
+    # if the ranking it displayed it can directly access the output label
+    # however if it's hidden it returns empty for some reason, so I recalculate save and remove.
+    if output_label['text']:
+        file.write(output_label['text'])
+    else:
+        calculate_ranking()
+        file.write(output_label['text'])
+        output_label.pack_forget()        
+    file.close()
 
 
 ##########################################
@@ -128,7 +147,6 @@ def export():
 ##########################################
 
 global check_var
-
 
 root = tk.Tk()
 root.title("the TTDP sorting hat")
