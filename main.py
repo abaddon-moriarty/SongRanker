@@ -169,7 +169,7 @@ file_menu = tk.Menu(menu, tearoff=False)
 display_option = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
-file_menu.add_cascade(label = "Export results in text file", command=export)
+file_menu.add_cascade(label = "Export results", command=export)
 menu.add_cascade(label="File", menu=file_menu)  
 
 # display options
