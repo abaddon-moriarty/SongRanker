@@ -19,7 +19,8 @@ def defineSongOrder(songList):
     return order
     
 def on_click(songList, i, j, ratingMatrix, choice):
-
+    global remove_height
+    
     # Updates the matrix based on user choice
     if choice == 1:
         ratingMatrix[i][j] = 1.0
@@ -33,7 +34,8 @@ def on_click(songList, i, j, ratingMatrix, choice):
         calculate_ranking()
         update_size()
     else: # This removes the ranking if the hide option is selected in the middle of the selections otherwise last rank remains on screen.
-        output_label['text'] = "" 
+        remove_height = output_label.winfo_height()
+        output_label.pack_forget()
         update_size()
     next_pair()
     
@@ -72,11 +74,19 @@ def calculate_ranking():
     output_label.pack(pady=10)
 
 def update_size():
+    global remove_height
+
     root.update_idletasks()
-    root.geometry(f"{root.winfo_reqwidth()}x{root.winfo_reqheight()}")
+
+    if remove_height:
+        root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight() - remove_height)}")
+    else:
+        root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight())}")
+    remove_height = 0
+
     
 def start():
-    global current_pair, order, ratingMatrix, songList
+    global current_pair, order, ratingMatrix, songList, remove_height
 
     start_button.pack_forget()
     # displaying the battle field
@@ -90,6 +100,8 @@ def start():
     progress_bar.pack(pady=5)
     pg_title.pack(pady=5)
     result_frame.pack()
+
+    remove_height = 0
     update_size()
     
     # Opens the list of songs, right now path hardcoded but later will add option to import txt file.
@@ -105,6 +117,10 @@ def start():
         progress_bar.configure(maximum = len(order))
 
         next_pair()
+
+def export():
+    with open("result.txt", mode="w", encoding="utf-8") as f:
+        f.write(output_label['text'])
 
 
 ##########################################
@@ -132,12 +148,16 @@ menu = tk.Menu(root)
 
 # sub_menu
 file_menu = tk.Menu(menu, tearoff=False)
+display_option = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
+file_menu.add_cascade(label = "Export results in text file", command=export)
+menu.add_cascade(label="File", menu=file_menu)  
+
 # display options
-file_menu.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var)
-file_menu.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var)
-menu.add_cascade(label="Ranking", menu=file_menu)  
+display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var)
+display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var)
+menu.add_cascade(label="Ranking Display", menu=display_option)
 root.configure(menu=menu)
 
 
