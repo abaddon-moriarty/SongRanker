@@ -1,8 +1,10 @@
 import random
+import filecmp
+
 import tkinter as tk
 
-from tkinter import ttk
-from tkinter.filedialog import asksaveasfile
+from tkinter import ttk, messagebox
+from tkinter.filedialog import asksaveasfile, askopenfilename
 
 ### TO DO: * right now the window size gets re-calculated at each choice, there must be a better way: calculating only when display option is changed and on start. check "update_size()"
 
@@ -87,7 +89,7 @@ def update_size():
     remove_height = 0
  
 def start():
-    global current_pair, order, ratingMatrix, songList, remove_height
+    global current_pair, order, ratingMatrix, songList, remove_height, tracklist_dir
 
     start_button.pack_forget()
     # displaying the battle field
@@ -105,8 +107,13 @@ def start():
     remove_height = 0
     update_size()
     
-    # Opens the list of songs, right now path hardcoded but later will add option to import txt file.
-    with open(file, encoding="utf-8", mode="r") as f:
+
+    # If no tracklist has been imported it will default to the ttpd tracklist
+    if not tracklist_dir:
+        tracklist_dir = "ttpd.txt"
+
+    # this opens the source tracjlis
+    with open(tracklist_dir, encoding="utf-8", mode="r") as f:
         songList = f.readlines()
         for i, song in enumerate(songList):
             songList[i] = song.replace("\n", "")
@@ -119,10 +126,9 @@ def start():
 
         next_pair()
 
-def export():
+def export_songs():
     files = [('Text Document', '*.txt'),
-             ('All Files', '*.*'),  
-             ('Python Files', '*.py'), ] 
+             ('All Files', '*.*')] 
 
     file = asksaveasfile(filetypes = files, 
                          defaultextension = files[0],
@@ -141,6 +147,31 @@ def export():
         output_label.pack_forget()        
     file.close()
 
+def import_songs():
+    global tracklist_dir
+    
+    filetypes = [('text files', '*.txt'),
+                ('All files', '*.*')]
+    
+
+    new_tracklist = askopenfilename(filetypes=filetypes, defaultextension=".txt")
+    if new_tracklist is None:
+        return
+    
+    # checks if the file the user is trying to open is already the one they're ranking.
+    if filecmp.cmp(new_tracklist, tracklist_dir):
+        messagebox.showinfo(title="No need", message='You are currently ranking this tracklist')
+    else:
+        # if there is already an on-going Ranking, pop-up window to ask if the user wants to start a new one.
+        # if yes: starts over with the chosen txt file, else: continues
+        if ratingMatrix:
+            answer = messagebox.askquestion('Are you sure?', 'Do you want to stop the current ranking?')
+            if answer == "yes":
+                start()
+            else:
+                return
+
+
 
 ##########################################
 ###### GUI window & basic variables ######
@@ -156,8 +187,8 @@ root.geometry("500x150") # sets size of the window
 label = tk.Label(root, text="Come and sort your favourite TTDP songs!", font=("Georgia", 12, "bold"))
 label.pack(padx=75, pady=20)
 
-# Input List of Songs: Start by obtaining a list of songs from the user or from a file.
-file = "C:/Users/munau/OneDrive/Desktop/Machine_Learning/SongRanker/ttpd.txt"
+tracklist_dir = ""
+
 
 ######################
 ###### THE MENU ######
@@ -169,7 +200,9 @@ file_menu = tk.Menu(menu, tearoff=False)
 display_option = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
-file_menu.add_cascade(label = "Export results", command=export)
+file_menu.add_cascade(label = "Import tracklist", command=import_songs)
+file_menu.add_cascade(label = "Export results", command=export_songs)
+
 menu.add_cascade(label="File", menu=file_menu)  
 
 # display options
