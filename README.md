@@ -1,7 +1,7 @@
 # SongRanker
 
 ## Overview
-The TTDP Sorting Hat is a Python application that helps users rank their favorite TTDP (Tortured Poets Department) songs. The app presents users with pairs of songs and allows them to choose their preferred song from each pair. Based on the user's choices, the app generates a ranking of the songs.
+The SongRanker is a Python application that helps users rank their favorite TTDP (Tortured Poets Department) songs. The app presents users with pairs of songs and allows them to choose their preferred song from each pair. Based on the user's choices, the app generates a ranking of the songs.
 
 ## Features
 - Pairwise comparison mechanism for ranking songs.
