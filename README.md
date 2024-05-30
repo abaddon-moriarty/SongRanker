@@ -31,7 +31,7 @@ Follow the instructions to choose your preferred song from each pair presented b
 The app will calculate the ranking as you go, which you can choose to display or hide.
 
 ## Future improvement
-- [ ] Option to import a new list of songs and rank those.
+- [x] Option to import a new list of songs and rank those.
 - [ ] Adding little icons in the ranking (if you choose to display it) to see which song won or lost a place.
 - [ ] the best thing would be to have a music snippet for each song, to be able to hear it before choosing, but that seems hard to do. I don't really know how to integrate spotify or equivalent.
 
