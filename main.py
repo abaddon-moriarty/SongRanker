@@ -1,3 +1,4 @@
+import os
 import random
 import filecmp
 
@@ -32,6 +33,13 @@ def on_click(songList, i, j, ratingMatrix, choice):
         ratingMatrix[i][j] = 2.0
     else:
         ratingMatrix[i][j] = 0.5
+    next_pair()
+    calculate_ranking()
+
+    
+
+def display_switch():
+    global remove_height
 
     # Displays or not the ranking based on display option
     if check_var.get() == True: # This will only update the ranking if display option is selected
@@ -41,7 +49,6 @@ def on_click(songList, i, j, ratingMatrix, choice):
         remove_height = output_label.winfo_height()
         output_label.pack_forget()
         update_size()
-    next_pair()
     
 def next_pair():
     global current_pair, check_var
@@ -110,9 +117,9 @@ def start():
 
     # If no tracklist has been imported it will default to the ttpd tracklist
     if not tracklist_dir:
-        tracklist_dir = "ttpd.txt"
+        tracklist_dir = f"{os.path.dirname(os.path.realpath(__file__))}\\ttpd.txt"
 
-    # this opens the source tracjlis
+    # this opens the source tracklist
     with open(tracklist_dir, encoding="utf-8", mode="r") as f:
         songList = f.readlines()
         for i, song in enumerate(songList):
@@ -168,6 +175,7 @@ def import_songs():
             answer = messagebox.askquestion('Are you sure?', 'Do you want to stop the current ranking?')
             if answer == "yes":
                 start()
+                update_size()
             else:
                 return
 
@@ -189,7 +197,6 @@ label.pack(padx=75, pady=20)
 
 tracklist_dir = ""
 
-
 ######################
 ###### THE MENU ######
 ######################
@@ -206,8 +213,8 @@ file_menu.add_cascade(label = "Export results", command=export_songs)
 menu.add_cascade(label="File", menu=file_menu)  
 
 # display options
-display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var)
-display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var)
+display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, command=display_switch)
+display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var, command=display_switch)
 menu.add_cascade(label="Ranking Display", menu=display_option)
 root.configure(menu=menu)
 
