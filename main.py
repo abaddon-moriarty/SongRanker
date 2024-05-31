@@ -36,9 +36,7 @@ def on_click(songList, i, j, ratingMatrix, choice):
     next_pair()
     calculate_ranking()
 
-    
-
-def display_switch():
+def display_toggle():
     global remove_height
 
     # Displays or not the ranking based on display option
@@ -58,7 +56,7 @@ def next_pair():
         button1.config(text=songList[i], command=lambda: on_click(songList, i, j, ratingMatrix, 1))
         button2.config(text=songList[j], command=lambda: on_click(songList, i, j, ratingMatrix, 2))
         button3.config(command=lambda: on_click(songList, i, j, ratingMatrix, 3))
-        pg_title.configure(text = f"{current_pair}/{len(order)}")
+        pg_title.configure(text = f"{current_pair}/{len(order)-1}")
         progress_bar['value'] = current_pair
         current_pair += 1
         
@@ -99,6 +97,7 @@ def start():
     global current_pair, order, ratingMatrix, songList, remove_height, tracklist_dir
 
     start_button.pack_forget()
+    
     # displaying the battle field
     button1.pack(padx=5, side='left')
     button2.pack(padx=5, side='left')
@@ -213,8 +212,8 @@ file_menu.add_cascade(label = "Export results", command=export_songs)
 menu.add_cascade(label="File", menu=file_menu)  
 
 # display options
-display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, command=display_switch)
-display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var, command=display_switch)
+display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, command=display_toggle)
+display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var, command=display_toggle)
 menu.add_cascade(label="Ranking Display", menu=display_option)
 root.configure(menu=menu)
 
