@@ -35,7 +35,7 @@ def on_click(i, j, choice, max_height, max_width, current_pair, ranking_status, 
         ratingMatrix[i][j] = 0.5
     next_pair(max_height, max_width, current_pair, ranking_status, order, short_song_list)
     calculate_ranking(check_var, ranking_status)
-
+ 
 def display_toggle(check_var, ranking_status):
     # Displays or not the ranking based on display option
     if check_var.get() == True: # This will only update the ranking if display option is selected
@@ -60,7 +60,7 @@ def next_pair(max_height, max_width, current_pair, ranking_status, order, short_
         pg_title.configure(text = f"{current_pair}/{len(order)-1}")
         progress_bar['value'] = current_pair
         current_pair += 1
-        
+
         # this will pad the buttons to match the highest number of lines so the buttons don't change size throughout the ranking.
         if "\n" not in short_song_list[i] and "\n" not in short_song_list[j]:
             button1.grid(ipady = max_height, pady=5, padx=5)
@@ -85,9 +85,9 @@ def calculate_ranking(check_var, ranking_status):
     scores = [0] * len(songList)
     for l in range(len(songList)):
         for m in range(len(songList)):
-            if ratingMatrix[l][m] == 1.0: 
+            if ratingMatrix[l][m] == 1.0:
                 scores[l] += 1
-            if ratingMatrix[l][m] == 2.0:  
+            if ratingMatrix[l][m] == 2.0:
                 scores[m] += 1
             if ratingMatrix[l][m] == 0.5:
                 scores[l] += 0.5
@@ -98,8 +98,8 @@ def calculate_ranking(check_var, ranking_status):
 
     # Sort the list based on scores to get the ranking
     ranking = sorted(song_scores, key=lambda x: x[1], reverse=True)
-
-    #output
+    
+        #output
     output_label['text'] = "\n".join([f"{i+1}. {song}: {score} points" for i, (song, score) in enumerate(ranking)])
 
     #this will place the ranking in the grid if the toggle is on or if the ranking is over.
@@ -109,14 +109,14 @@ def calculate_ranking(check_var, ranking_status):
         output_label.grid(row=0, column=1, sticky="we")#, columnspan=4, sticky="ns", pady=(10, 20))
         result_frame.configure(height=result_frame.winfo_reqheight())
     update_size()
-
+ 
 def update_size():
     root.update_idletasks()
-        root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight())}")
+    root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight())}")
 
-def start(tracklist_dir):
+def start():
 
-    global songList, ratingMatrix
+    global songList, ratingMatrix, tracklist_dir
 
     start_button.grid_forget()
     mise_en_place()
@@ -165,12 +165,13 @@ def export_songs(ranking_status):
         file.write(output_label['text'])
         output_label.grid_forget()        
 
-def import_songs(ranking_status, tracklist_dir):
+def import_songs(ranking_status):
+
+    global tracklist_dir
     
     filetypes = [('text files', '*.txt'),
                 ('All files', '*.*')]
     
-
     new_tracklist = askopenfilename(filetypes=filetypes, defaultextension=".txt")
     if new_tracklist is None:
         return
@@ -182,13 +183,13 @@ def import_songs(ranking_status, tracklist_dir):
         # if yes: starts over with the chosen txt file, else: continues
         if ratingMatrix:
             if ranking_status == False:
-            answer = messagebox.askquestion('Are you sure?', 'Do you want to stop the current ranking?')
-            if answer == "yes":
+                answer = messagebox.askquestion('Are you sure?', 'Do you want to stop the current ranking?')
+                if answer == "yes":
                     tracklist_dir = new_tracklist
-                    restart(ranking_status, tracklist_dir)
+                    restart(ranking_status)
             else:
                 tracklist_dir = new_tracklist
-                restart(ranking_status, tracklist_dir)
+                restart(ranking_status)
             
 # makes the end_screen, calculates & resizes if display off
 def end_screen(ranking_status):
@@ -210,7 +211,7 @@ def end_screen(ranking_status):
     calculate_ranking(check_var, ranking_status)
 
 # puts all the back back to zero so we can start a new session.
-def restart(ranking_status, tracklist_dir):
+def restart(ranking_status):
 
     restart_frame.grid_forget()
     output_label.grid_forget()
@@ -219,7 +220,7 @@ def restart(ranking_status, tracklist_dir):
     ranking_status = False
     
     mise_en_place()
-    start(tracklist_dir)
+    start()
 
 # when using grid & bc we have different length song titles, the button size constantly updates and moves the whole grid around. 
 #This finds the longest song title in the list and uses that width everytime, so there's no shiftin around.
@@ -349,10 +350,10 @@ label = tk.Label(main_frame, text="Come and sort your favourite TTDP songs!", fo
 end_credits = ttk.Label(main_frame, text="Congratulations, You're all done !", font=("Georgia", 12))
 
 
-global songList, ratingMatrix
+global songList, ratingMatrix, tracklist_dir
 
 
-tracklist_dir = f"{os.path.dirname(os.path.realpath(__file__))}\\test.txt"
+tracklist_dir = ""
 songList = []
 ratingMatrix = []
 ranking_status = False
@@ -367,11 +368,11 @@ file_menu = tk.Menu(menu, tearoff=False)
 display_option = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
-file_menu.add_cascade(label = "Export results", command=lambda: import_songs(ranking_status, tracklist_dir))
-file_menu.add_cascade(label = "Import tracklist", command=lambda: import_songs(ranking_status, tracklist_dir))
+file_menu.add_cascade(label = "Export results", command=lambda: export_songs(ranking_status))
+file_menu.add_cascade(label = "Import tracklist", command=lambda: import_songs(ranking_status))
 
 menu.add_cascade(label="File", menu=file_menu)  
-
+ 
 # display options
 display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, 
                                command=lambda : display_toggle(check_var, ranking_status))
@@ -397,13 +398,13 @@ output_label = ttk.Label(result_frame, font=("Georgia", 11))
 
 # This is the only button that will be displayed from the start, on click it will disapear and reveal the rest of the battle field.
 start_button = ttk.Button(main_frame, text="Start Here", style="start.TButton",
-                          command=lambda : start(tracklist_dir))
+                          command=lambda : start())
 
 # Restart buttons
 new_start = ttk.Button(restart_frame, text="Start Again", style="elder.TButton",
-                       command=lambda: restart(ranking_status, tracklist_dir=))
+                       command=lambda: restart(ranking_status))
 new_songs = ttk.Button(restart_frame, text="Rank new songs", style="elder.TButton",
-                       command=lambda: import_songs(ranking_status, tracklist_dir))
+                       command=lambda: import_songs(ranking_status))
 close_window = ttk.Button(restart_frame, text="Close window", style="elder.TButton",
                           command=lambda : root.destroy())
     
