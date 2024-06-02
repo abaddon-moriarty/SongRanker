@@ -1,4 +1,5 @@
 import os
+import string  
 import random
 import filecmp
 
@@ -23,8 +24,7 @@ def defineSongOrder(songList):
 
     return order
     
-def on_click(songList, i, j, ratingMatrix, choice):
-    global remove_height
+def on_click(i, j, choice, max_height, max_width, current_pair, ranking_status, order, short_song_list, check_var):
     
     # Updates the matrix based on user choice
     if choice == 1:
@@ -33,29 +33,29 @@ def on_click(songList, i, j, ratingMatrix, choice):
         ratingMatrix[i][j] = 2.0
     else:
         ratingMatrix[i][j] = 0.5
-    next_pair()
-    calculate_ranking()
+    next_pair(max_height, max_width, current_pair, ranking_status, order, short_song_list)
+    calculate_ranking(check_var, ranking_status)
 
-def display_toggle():
-    global remove_height
-
+def display_toggle(check_var, ranking_status):
     # Displays or not the ranking based on display option
     if check_var.get() == True: # This will only update the ranking if display option is selected
-        calculate_ranking()
+        calculate_ranking(check_var, ranking_status)
         update_size()
     else: # This removes the ranking if the hide option is selected in the middle of the selections otherwise last rank remains on screen.
         remove_height = output_label.winfo_height()
         output_label.pack_forget()
         update_size()
     
-def next_pair():
-    global current_pair, check_var
+def next_pair(max_height, max_width, current_pair, ranking_status, order, short_song_list):
 
     if current_pair < len(order):
         i, j = order[current_pair]
-        button1.config(text=songList[i], command=lambda: on_click(songList, i, j, ratingMatrix, 1))
-        button2.config(text=songList[j], command=lambda: on_click(songList, i, j, ratingMatrix, 2))
-        button3.config(command=lambda: on_click(songList, i, j, ratingMatrix, 3))
+        button1.configure(text=short_song_list[i], 
+                          command=lambda: on_click(i, j, 1, max_height, max_width, current_pair, ranking_status, order, short_song_list, check_var)) #, width = max_width)
+        button2.configure(text=short_song_list[j], 
+                          command=lambda: on_click(i, j, 2, max_height, max_width, current_pair, ranking_status, order, short_song_list, check_var)) #, width = max_width)
+        button3.configure(command=lambda: on_click(i, j, 3, max_height, max_width, current_pair, ranking_status, order, short_song_list, check_var)) #, width = max_width)
+        
         pg_title.configure(text = f"{current_pair}/{len(order)-1}")
         progress_bar['value'] = current_pair
         current_pair += 1
@@ -91,10 +91,10 @@ def update_size():
         root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight() - remove_height)}")
     else:
         root.geometry(f"{root.winfo_reqwidth()}x{(root.winfo_reqheight())}")
-    remove_height = 0
- 
-def start():
-    global current_pair, order, ratingMatrix, songList, remove_height, tracklist_dir
+
+def start(tracklist_dir):
+
+    global songList, ratingMatrix
 
     start_button.pack_forget()
     
@@ -116,7 +116,7 @@ def start():
 
     # If no tracklist has been imported it will default to the ttpd tracklist
     if not tracklist_dir:
-        tracklist_dir = f"{os.path.dirname(os.path.realpath(__file__))}\\ttpd.txt"
+        tracklist_dir = f"{os.path.dirname(os.path.realpath(__file__))}\\test.txt"
 
     # this opens the source tracklist
     with open(tracklist_dir, encoding="utf-8", mode="r") as f:
@@ -132,7 +132,7 @@ def start():
 
         next_pair()
 
-def export_songs():
+def export_songs(ranking_status):
     files = [('Text Document', '*.txt'),
              ('All Files', '*.*')] 
 
@@ -148,13 +148,11 @@ def export_songs():
     if output_label['text']:
         file.write(output_label['text'])
     else:
-        calculate_ranking()
+        calculate_ranking(check_var, ranking_status)
         file.write(output_label['text'])
-        output_label.pack_forget()        
-    file.close()
+        output_label.grid_forget()        
 
-def import_songs():
-    global tracklist_dir
+def import_songs(ranking_status, tracklist_dir):
     
     filetypes = [('text files', '*.txt'),
                 ('All files', '*.*')]
@@ -163,7 +161,6 @@ def import_songs():
     new_tracklist = askopenfilename(filetypes=filetypes, defaultextension=".txt")
     if new_tracklist is None:
         return
-    
     # checks if the file the user is trying to open is already the one they're ranking.
     if filecmp.cmp(new_tracklist, tracklist_dir):
         messagebox.showinfo(title="No need", message='You are currently ranking this tracklist')
@@ -183,8 +180,6 @@ def import_songs():
 ##########################################
 ###### GUI window & basic variables ######
 ##########################################
-
-global check_var
 
 root = tk.Tk()
 root.title("the TTDP sorting hat")
@@ -206,14 +201,16 @@ file_menu = tk.Menu(menu, tearoff=False)
 display_option = tk.Menu(menu, tearoff=False)
 check_var = tk.BooleanVar()
 
-file_menu.add_cascade(label = "Import tracklist", command=import_songs)
-file_menu.add_cascade(label = "Export results", command=export_songs)
+file_menu.add_cascade(label = "Export results", command=lambda: import_songs(ranking_status, tracklist_dir))
+file_menu.add_cascade(label = "Import tracklist", command=lambda: import_songs(ranking_status, tracklist_dir))
 
 menu.add_cascade(label="File", menu=file_menu)  
 
 # display options
-display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, command=display_toggle)
-display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var, command=display_toggle)
+display_option.add_radiobutton(label="View Ranking Evolution", value=1, variable = check_var, 
+                               command=lambda : display_toggle(check_var, ranking_status))
+display_option.add_radiobutton(label="Leave Ranking as Surprise", value=0, variable = check_var, 
+                               command=lambda : display_toggle(check_var, ranking_status))
 menu.add_cascade(label="Ranking Display", menu=display_option)
 root.configure(menu=menu)
 
